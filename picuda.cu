@@ -57,9 +57,11 @@ int main(int argc, char *argv[])
     long int iterations;
     int totalThreads;
     double *h_pitotal, *d_pitotal;
+    std::cout << "OK1\n";
     
     sscanf(argv[1], "%i", &blocksPerGrid);
     cudaError_t err = cudaSuccess;
+    std::cout << "OK2\n";
 
     size = sizeof(double)*NUMTHREADS;
     h_pitotal = (double *)malloc(size);
@@ -67,21 +69,25 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to allocate host vectors!\n");
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK3\n";
     
     for(i = 0; i < NUMTHREADS; i++)
         h_pitotal[i] = 0.0;
+    std::cout << "OK4\n";
 
     err = cudaMalloc((void **)&d_pitotal, size);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to allocate device vector C (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK5\n";
     
     err = cudaMemcpy(d_pitotal, h_pitotal, sizeof(double)*NUMTHREADS, cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to copy vector C from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK6\n";
 
     // Lanzar KERNEL
     threadsPerBlock = NUMTHREADS/blocksPerGrid;
@@ -90,32 +96,38 @@ int main(int argc, char *argv[])
     printf("CUDA kernel launch with %d blocks of %d threads Total: %i\n", blocksPerGrid, threadsPerBlock, totalThreads  );
     calculatePi<<<blocksPerGrid, threadsPerBlock>>>(d_pitotal, iterations, totalThreads);
     err = cudaGetLastError();
+    std::cout << "OK7\n";
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK8\n";
 
     err = cudaMemcpy(h_pitotal, d_pitotal, size, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to copy vector C from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK9\n";
 
     err = cudaFree(d_pitotal);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to free device vector C (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK10\n";
 
     printf("\n%.12f", *h_pitotal);
     // Free host memory
 
     free(h_pitotal);
     err = cudaDeviceReset();
+    std::cout << "OK11\n";
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to deinitialize the device! error=%s\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    std::cout << "OK12\n";
     return 0;
 }
 
