@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
     double *h_pitotal, *d_pitotal;
     std::cout << "OK1\n";
     
-    sscanf(argv[1], "%i", &blocksPerGrid);
+    //sscanf(argv[1], "%i", &blocksPerGrid);
+    blocksPerGrid = 10;
     cudaError_t err = cudaSuccess;
     std::cout << "OK2\n";
 
