@@ -509,21 +509,49 @@ void Image::scaleImage(){
 
 	int *d_pixels;
 	size_t size = imageSize * sizeof(int);
+    cudaError_t err = cudaSuccess;
 
 	/* Allocate memory in device */
-	cudaMalloc((void **) &d_pixels, size);
+	err = cudaMalloc((void **) &d_pixels, size);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to allocate device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Copy data to device */
-	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
+	err = cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
 	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+    err = cudaGetLastError();
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to launch scaleImageCuda kernel (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Copy data to tohost device */
-	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
+	err = cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Clean-up */
 	cudaFree(d_pixels);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaDeviceReset();
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to deinitialize the device! error=%s\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	maxPixelValue = 255;
 
@@ -532,38 +560,77 @@ void Image::scaleImage(){
 //Sobel edge detection function - detects edges and draws an outline
 void Image::edgeDection(){
 
+    cudaError_t err = cudaSuccess;
 	size_t size = imageSize * sizeof(int);
 	/* Allocate memory in host */
 	int *tempImage = (int *)malloc(size);
 
 	int *d_pixels, *d_tempImage;
 	/* Allocate memory in device */
-	cudaMalloc((void **) &d_pixels, size);
-	cudaMalloc((void **) &d_tempImage, size);
+	err = cudaMalloc((void **) &d_pixels, size);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to allocate device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	err = cudaMalloc((void **) &d_tempImage, size);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to allocate device vector tempImage (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Copy data to device */
-	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
+	err = cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	err = cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Launch edgeDetectionCuda() kernel on device with N threads in N blocks */
 	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
+    err = cudaGetLastError();
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to launch edgeDetectionCuda kernel (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Copy data to host */
-	cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
-	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
+	err = cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	err = cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	/* Clean-up device */
-	cudaFree(d_tempImage);
-	cudaFree(d_pixels);
+	err = cudaFree(d_tempImage);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to free device vector tempImage (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	err = cudaFree(d_pixels);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 	int cantidad = 0;
 	for(unsigned int i = 0; i < imageSize; i++){
 
 		pixels[i] = tempImage[i];
 		if (tempImage[i] > 0 && cantidad < 100) {
-			cout << i << ": " << tempImage[i];
+			cout << i << " pos: " << tempImage[i];
 			cantidad++;
 		}
+
 
 	}
 
