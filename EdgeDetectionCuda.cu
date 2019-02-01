@@ -40,7 +40,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	thread in the device */
 	int index = threadIdx.x * blockIdx.x * threadIdx.x;
 	int x = 0, y = 0;
-	float xG = 0, float = 0;
+	float xG = 0, yG = 0;
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
