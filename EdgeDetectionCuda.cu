@@ -71,7 +71,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 										   - (2 * pixels[(x) + ((y-1) * width)])
 										   - pixels[(x+1) + ((y-1) * width)]);
 
-			tempImage[index] = sqrt((xG * xG) + (yG * yG));
+			tempImage[index] = (int) sqrt((xG * xG) + (yG * yG));
 
 		} else {
 
