@@ -545,11 +545,12 @@ void Image::edgeDection(){
 	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
 
-	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
+	/* Launch edgeDetectionCuda() kernel on device with N threads in N blocks */
 	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
 
-	/* Copy data to tohost device */
+	/* Copy data to host */
 	cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
+	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
 
 	/* Clean-up device */
 	cudaFree(d_tempImage);
