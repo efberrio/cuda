@@ -34,7 +34,7 @@ __global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSi
     __syncthreads();
 }
 
-__global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int imageSize) {
+__global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int height, int imageSize) {
 	/* blockDim.x gives the number of threads per block, combining it
 	with threadIdx.x and blockIdx.x gives the index of each global
 	thread in the device */
@@ -546,7 +546,7 @@ void Image::edgeDection(){
 	cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
 
 	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
-	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, imageSize);
+	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
 
 	/* Copy data to tohost device */
 	cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
