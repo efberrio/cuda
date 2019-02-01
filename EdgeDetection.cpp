@@ -457,9 +457,7 @@ void Image::edgeDection(){
 		x = i % width;
 
 		if(i != 0 && x == 0){
-
-			y = (int) (x / width);
-
+			y = (int) ((double)i / (double)width);
 		}
 
 		if(x < (width - 1) && y < (height - 1)
