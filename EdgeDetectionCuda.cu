@@ -27,7 +27,7 @@ __global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSi
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
-		value = round(((double)(pixels[i] - minpix) / (maxpix - minpix)) * 255);
+		value = round(((double)(pixels[index] - minpix) / (maxpix - minpix)) * 255);
 		pixels[index] = value;
 	}
 
@@ -468,7 +468,7 @@ void Image::scaleImage(){
 	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
 
 	/* Launch add() kernel on device with N threads in N blocks */
-	scaleImageCuda<<<(N + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
 	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
 	maxPixelValue = 255;
 
