@@ -27,8 +27,8 @@ __global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSi
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
-		value = round(((double)(pixels[i] - minpix) / (maxpix - minpix))) * 255);
-		pixels[index] = newPixelValue;
+		value = round(((double)(pixels[i] - minpix) / (maxpix - minpix)) * 255);
+		pixels[index] = value;
 	}
 
     __syncthreads();
@@ -454,16 +454,12 @@ void Image::findMin(){
 //Scales image so that the maximum pixel value is 255
 void Image::scaleImage(){
 
-	double calc = 0.0;
-
-	int newPixelValue = 0;
-
 	findMin();
 
 	findMax();
 
 	int *d_pixels;
-	size_t size = N * sizeof(int);
+	size_t size = imageSize * sizeof(int);
 
 	/* Allocate memory in device */
 	cudaMalloc((void **) &d_pixels, size);
