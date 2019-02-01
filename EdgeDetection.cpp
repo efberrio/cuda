@@ -498,7 +498,7 @@ void Image::edgeDection(){
 
 		pixels[i] = tempImage[i];
 		if (tempImage[i] > 0 && cantidad < 100) {
-			cout << i << ": " << tempImage[i];
+			cout << i << " pos: " << tempImage[i];
 			cantidad++;
 		}
 
