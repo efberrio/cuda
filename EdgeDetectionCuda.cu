@@ -34,6 +34,55 @@ __global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSi
     __syncthreads();
 }
 
+__global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int imageSize) {
+	/* blockDim.x gives the number of threads per block, combining it
+	with threadIdx.x and blockIdx.x gives the index of each global
+	thread in the device */
+	int index = threadIdx.x * blockIdx.x * threadIdx.x;
+	int x = 0, y = 0;
+	int xG = 0, yG = 0;
+	/* Typical problems are not friendly multiples of blockDim.x.
+	Avoid accesing data beyond the end of the arrays */
+	if (index < imageSize) {
+		x = index % width;
+
+		if(index != 0 && x == 0){
+			y = (int) ((double)index / (double)width);
+		}
+
+		if(x < (width - 1) && y < (height - 1)
+				&& (y > 0) && (x > 0)){
+
+			//index = x + (y * width)
+			//Finds the horizontal gradient
+			xG = (pixels[(x+1) + ((y-1) * width)]
+						 + (2 * pixels[(x+1) + (y * width)])
+						 + pixels[(x+1) + ((y+1) * width)]
+								  - pixels[(x-1) + ((y-1) * width)]
+										   - (2 * pixels[(x-1) + (y * width)])
+										   - pixels[(x-1) + ((y+1) * width)]);
+
+
+			//Finds the vertical gradient
+			yG = (pixels[(x-1) + ((y+1) * width)]
+						 + (2 * pixels[(x) + ((y + 1) * width)])
+						 + pixels[(x+1) + ((y+1) * width)]
+								  - pixels[(x-1) + ((y-1) * width)]
+										   - (2 * pixels[(x) + ((y-1) * width)])
+										   - pixels[(x+1) + ((y-1) * width)]);
+
+			tempImage[index] = sqrt((xG * xG) + (yG * yG));
+
+		} else {
+
+			//Pads out of bound pixels with 0
+			tempImage[index] = 0;
+
+		}
+	}
+
+    //__syncthreads();
+}
 
 //Creating image class (base class)
 class Image{
@@ -467,9 +516,15 @@ void Image::scaleImage(){
 	/* Copy data to device */
 	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
 
-	/* Launch add() kernel on device with N threads in N blocks */
+	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
 	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+
+	/* Copy data to tohost device */
 	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
+
+	/* Clean-up */
+	cudaFree(d_pixels);
+
 	maxPixelValue = 255;
 
 }
@@ -477,54 +532,28 @@ void Image::scaleImage(){
 //Sobel edge detection function - detects edges and draws an outline
 void Image::edgeDection(){
 
-	int x = 0, y = 0;
+	size_t size = imageSize * sizeof(int);
+	/* Allocate memory in host */
+	int *tempImage = (int *)malloc(size);
 
-	int xG = 0, yG = 0;
+	int *d_pixels, *d_tempImage;
+	/* Allocate memory in device */
+	cudaMalloc((void **) &d_pixels, size);
+	cudaMalloc((void **) &d_tempImage, size);
 
-	int * tempImage = new int[imageSize];
+	/* Copy data to device */
+	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
 
-	for(unsigned int i = 0; i < imageSize; i++){
+	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
+	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, imageSize);
 
-		x = i % width;
+	/* Copy data to tohost device */
+	cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
 
-		if(i != 0 && x == 0){
-
-			y++;
-
-		}
-
-		if(x < (width - 1) && y < (height - 1)
-				&& (y > 0) && (x > 0)){
-
-			//index = x + (y * width)
-			//Finds the horizontal gradient
-			xG = (pixels[(x+1) + ((y-1) * width)]
-						 + (2 * pixels[(x+1) + (y * width)])
-						 + pixels[(x+1) + ((y+1) * width)]
-								  - pixels[(x-1) + ((y-1) * width)]
-										   - (2 * pixels[(x-1) + (y * width)])
-										   - pixels[(x-1) + ((y+1) * width)]);
-
-
-			//Finds the vertical gradient
-			yG = (pixels[(x-1) + ((y+1) * width)]
-						 + (2 * pixels[(x) + ((y + 1) * width)])
-						 + pixels[(x+1) + ((y+1) * width)]
-								  - pixels[(x-1) + ((y-1) * width)]
-										   - (2 * pixels[(x) + ((y-1) * width)])
-										   - pixels[(x+1) + ((y-1) * width)]);
-
-			//newPixel = sqrt(xG^2 + yG^2)
-			tempImage[i] = sqrt((xG * xG) + (yG * yG));
-
-		}else{
-
-			//Pads out of bound pixels with 0
-			tempImage[i] = 0;
-
-		}
-
-	}
+	/* Clean-up device */
+	cudaFree(d_tempImage);
+	cudaFree(d_pixels);
 
 	for(unsigned int i = 0; i < imageSize; i++){
 
@@ -532,8 +561,8 @@ void Image::edgeDection(){
 
 	}
 
+	/* Clean-up host */
 	free(tempImage);
-
 }
 
 bool isBinary(ifstream &inFile);
