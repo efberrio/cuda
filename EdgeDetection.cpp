@@ -493,11 +493,13 @@ void Image::edgeDection(){
 
 	}
 
+	int cantidad = 0;
 	for(unsigned int i = 0; i < imageSize; i++){
 
 		pixels[i] = tempImage[i];
-		if (i < 20) {
-			cout << ": " << tempImage[i];
+		if (tempImage[i] > 0 && cantidad < 100) {
+			cout << i << ": " << tempImage[i];
+			cantidad++;
 		}
 
 	}
