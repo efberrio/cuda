@@ -6,7 +6,34 @@
 #include <time.h>
 #include <stdlib.h>
 
+// For the CUDA runtime routines (prefixed with "cuda_")
+#include <cuda_runtime.h>
+
 using namespace std;
+
+const int THREADS_PER_BLOCK = 512;
+
+/**
+ * CUDA Kernel Device code
+ */ 
+/*****************************************************************************/
+
+__global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSize) {
+	/* blockDim.x gives the number of threads per block, combining it
+	with threadIdx.x and blockIdx.x gives the index of each global
+	thread in the device */
+	int index = threadIdx.x * blockIdx.x * threadIdx.x;
+	int value;
+	/* Typical problems are not friendly multiples of blockDim.x.
+	Avoid accesing data beyond the end of the arrays */
+	if (index < imageSize) {
+		value = round(((double)(pixels[i] - minpix) / (maxpix - minpix))) * 255);
+		pixels[index] = newPixelValue;
+	}
+
+    __syncthreads();
+}
+
 
 //Creating image class (base class)
 class Image{
@@ -48,7 +75,7 @@ protected:
 	int minpix;
 	int maxpix;
 	unsigned int imageSize;
-	vector<int>pixels;
+	int * pixels;
 
 	inline void findMin();
 	inline void findMax();
@@ -127,15 +154,16 @@ void BinaryImage::readImage(ifstream &inFile){
 	byteArray[imageSize] = '\0';
 
 	//Put the data read from file into pixels
+	pixels = (int *)malloc(imageSize * sizeof(int));
 	for(unsigned int i = 0; i < imageSize; i++){
 
-		pixels.push_back(static_cast<int>
-		(static_cast<unsigned char>(byteArray[i])));
+		pixels[i] = static_cast<int>
+		(static_cast<unsigned char>(byteArray[i]));
 
 	}
 
 	//Delete the byteArray
-	delete[] byteArray;
+	free(byteArray);
 
 }
 
@@ -178,7 +206,9 @@ void BinaryImage::writeImage(ofstream &outFile){
 
 	}
 
-	delete[] byteArray;
+	free(byteArray);
+	free(pixels);
+	//delete[] byteArray;
 
 }
 
@@ -196,9 +226,11 @@ void AsciiImage::readImage(ifstream &inFile){
 	int pixelValue;
 
 	//Read in the Ascii values from file
+	int i = 0;
 	while(inFile >> pixelValue){
 
-		pixels.push_back(pixelValue);
+		pixels[i] = pixelValue;
+		i++;
 
 	}
 
@@ -229,10 +261,11 @@ void AsciiImage::writeImage(ofstream &outFile){
 		//Add a '\n' at the end of each row
 		if(i % width == 0 && i != 0) outFile << '\n';
 
-		outFile << pixels.at(i) << '\t';
+		outFile << pixels[i] << '\t';
 
 	}
 
+	free(pixels);
 }
 
 void Image::readHeader(ifstream &inFile){
@@ -429,16 +462,18 @@ void Image::scaleImage(){
 
 	findMax();
 
-	for(unsigned int i = 0; i < imageSize; i++){
+	int *d_pixels;
+	size_t size = N * sizeof(int);
 
-		calc = (double)(pixels[i] - minpix) / (maxpix - minpix);
+	/* Allocate memory in device */
+	cudaMalloc((void **) &d_pixels, size);
 
-		newPixelValue = round(calc * 255);
+	/* Copy data to device */
+	cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
 
-		pixels.at(i) = newPixelValue;
-
-	}
-
+	/* Launch add() kernel on device with N threads in N blocks */
+	scaleImageCuda<<<(N + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+	cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
 	maxPixelValue = 255;
 
 }
@@ -501,6 +536,7 @@ void Image::edgeDection(){
 
 	}
 
+	free(tempImage);
 
 }
 
