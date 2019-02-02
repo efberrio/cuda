@@ -22,7 +22,7 @@ __global__ void scaleImageCuda (int *pixels, int *tempImage, int minpix, int max
 	/* blockDim.x gives the number of threads per block, combining it
 	with threadIdx.x and blockIdx.x gives the index of each global
 	thread in the device */
-	int index = threadIdx.x * blockIdx.x * threadIdx.x;
+	int index = (blockDim.x * blockIdx.x) + threadIdx.x;
 	int value;
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
