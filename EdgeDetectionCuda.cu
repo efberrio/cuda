@@ -49,7 +49,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 
 		if (index != 0 && x == 0) {
 			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));	
-			printf("y=%d\n", y);
+
 		}
 
 		if (x < (width - 1) && y < (height - 1)
@@ -72,7 +72,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 								  - pixels[(x-1) + ((y-1) * width)]
 										   - (2 * pixels[(x) + ((y-1) * width)])
 										   - pixels[(x+1) + ((y-1) * width)]);
-
+			printf("xG=%d\n", xG);
 			tempImage[index] = __double2int_rn(sqrt(__int2double_rn(xG * xG) + __int2double_rn(yG * yG)));
 
 		} else {
