@@ -48,6 +48,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 
 		if (index != 0 && x == 0) {
 			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));
+			printf(y);
 		}
 
 		if (x < (width - 1) && y < (height - 1)
@@ -541,7 +542,7 @@ void Image::scaleImage(){
     }
 
 	/* Clean-up */
-	cudaFree(d_pixels);
+	err = cudaFree(d_pixels);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
