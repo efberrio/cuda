@@ -47,9 +47,6 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	Avoid accesing data beyond the end of the arrays */
 	int cantidadAciertos = 0;
 	if (index < imageSize) {
-		if (index < 5000) {
-			printf("entrando a cuda ancho=%d, alto=%d\n", width, height);
-		}
 		x = index % width;
 
 		if (index != 0 && x == 0) {
