@@ -48,7 +48,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 
 		if (index != 0 && x == 0) {
 			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));
-			printf(y);
+			printf("y=%d\n", y);
 		}
 
 		if (x < (width - 1) && y < (height - 1)
