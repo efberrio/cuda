@@ -521,7 +521,7 @@ void Image::scaleImage(){
 	/* Copy data to device */
 	err = cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to copy vector pixels from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
