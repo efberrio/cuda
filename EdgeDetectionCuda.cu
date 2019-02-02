@@ -18,7 +18,7 @@ const int THREADS_PER_BLOCK = 512;
  */ 
 /*****************************************************************************/
 
-__global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSize) {
+__global__ void scaleImageCuda (int *pixels, int *tempImage, int minpix, int maxpix, int imageSize) {
 	/* blockDim.x gives the number of threads per block, combining it
 	with threadIdx.x and blockIdx.x gives the index of each global
 	thread in the device */
@@ -28,7 +28,7 @@ __global__ void scaleImageCuda (int *pixels, int minpix, int maxpix, int imageSi
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
 		value = round(((double)(pixels[index] - minpix) / (maxpix - minpix)) * 255);
-		pixels[index] = value;
+		tempImage[index] = value;
 	}
 
     __syncthreads();
@@ -509,15 +509,24 @@ void Image::scaleImage(){
 
 	printf("OK1\n");
 
-	int *d_pixels;
+	int *d_pixels, *d_tempImage;
 	size_t size = imageSize * sizeof(int);
-    cudaError_t err = cudaSuccess;
+	cudaError_t err = cudaSuccess;
+
+	/* Allocate memory in host */
+	int *tempImage = (int *)malloc(size);
+	
 	printf("OK2\n");
 
 	/* Allocate memory in device */
 	err = cudaMalloc((void **) &d_pixels, size);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to allocate device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	err = cudaMalloc((void **) &d_tempImage, size);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to allocate device vector d_tempImage (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	printf("OK3\n");
@@ -545,9 +554,19 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	err = cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to copy vector tempImage from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 	printf("OK6\n");
 
 	/* Clean-up */
+	err = cudaFree(d_tempImage);
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to free array vector tempImage (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 	err = cudaFree(d_pixels);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
@@ -561,6 +580,10 @@ void Image::scaleImage(){
         exit(EXIT_FAILURE);
     }
 	printf("OK8\n");
+
+	for(unsigned int i = 0; i < imageSize; i++){
+		pixels[i] = tempImage[i];
+	}
 
 	maxPixelValue = 255;
 
@@ -638,9 +661,7 @@ void Image::edgeDection(){
 	printf("reseteo device\n");
 
 	for(unsigned int i = 0; i < imageSize; i++){
-
 		pixels[i] = tempImage[i];
-
 	}
 	printf("copio resultado\n");
 
