@@ -46,6 +46,9 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
+		if (index < 5000) {
+			printf("entrando a cuda\n");
+		}
 		x = index % width;
 
 		if (index != 0 && x == 0) {
