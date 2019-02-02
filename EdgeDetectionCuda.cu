@@ -81,7 +81,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 		}
 	}
 
-    //__syncthreads();
+    __syncthreads();
 }
 
 //Creating image class (base class)
