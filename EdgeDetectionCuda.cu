@@ -630,6 +630,13 @@ void Image::edgeDection(){
     }
 	printf("libero memoria\n");
 
+    err = cudaDeviceReset();
+    if (err != cudaSuccess){
+        fprintf(stderr, "Failed to deinitialize the device! error=%s\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+	printf("reseteo device\n");
+
 	for(unsigned int i = 0; i < imageSize; i++){
 
 		pixels[i] = tempImage[i];
