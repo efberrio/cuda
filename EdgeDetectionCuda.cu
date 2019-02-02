@@ -562,6 +562,7 @@ void Image::scaleImage(){
 
 //Sobel edge detection function - detects edges and draws an outline
 void Image::edgeDection(){
+	printf("a ver qué es lo que pasa");
 
     cudaError_t err = cudaSuccess;
 	size_t size = imageSize * sizeof(int);
