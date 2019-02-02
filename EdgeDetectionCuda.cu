@@ -38,7 +38,8 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	/* blockDim.x gives the number of threads per block, combining it
 	with threadIdx.x and blockIdx.x gives the index of each global
 	thread in the device */
-	int index = threadIdx.x * blockIdx.x * threadIdx.x;
+	//int index = threadIdx.x * blockIdx.x * threadIdx.x;
+	int index = (blockDim.x * blockIdx.x) + threadIdx.x;
 	int x = 0, y = 0;
 	int xG = 0, yG = 0;
 	/* Typical problems are not friendly multiples of blockDim.x.
@@ -47,7 +48,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 		x = index % width;
 
 		if (index != 0 && x == 0) {
-			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));
+			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));	
 			printf("y=%d\n", y);
 		}
 
