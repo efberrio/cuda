@@ -42,9 +42,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	int index = (blockDim.x * blockIdx.x) + threadIdx.x;
 	int x = 0, y = 0;
 	int xG = 0, yG = 0;
-	if ((index % 1000) == 0)  {
-		printf("qué es lo que pasa\n");
-	}
+
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
@@ -52,6 +50,9 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 
 		if (index != 0 && x == 0) {
 			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));	
+			if (y > 0){
+				printf("por lo menos hay y\n %d", y);
+			}
 		}
 
 		if (x < (width - 1) && y < (height - 1)
