@@ -568,12 +568,12 @@ void Image::edgeDection(){
 	/* Allocate memory in device */
 	err = cudaMalloc((void **) &d_pixels, size);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to allocate device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to allocate device array pixels (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	err = cudaMalloc((void **) &d_tempImage, size);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to allocate device vector tempImage (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to allocate device array tempImage (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
 	}
 	printf("alojo memoria\n");
@@ -603,25 +603,20 @@ void Image::edgeDection(){
 	/* Copy data to host */ 
 	err = cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to copy array tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-	/*err = cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
-    if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
-    }*/
 	printf("copio memoria a host\n");
 
 	/* Clean-up device */
 	err = cudaFree(d_tempImage);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to free device vector tempImage (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to free array vector tempImage (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	err = cudaFree(d_pixels);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to free array vector pixels (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	printf("libero memoria\n");
