@@ -45,7 +45,6 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
-	int cantidadAciertos = 0;
 	if (index < imageSize) {
 		x = index % width;
 
