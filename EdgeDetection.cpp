@@ -461,9 +461,6 @@ void Image::edgeDection(){
 		if(i != 0 && x == 0){
 			y = (int) ((double)i / (double)width);
 		}
-		if (i <= 1000) {
-			printf	("y=%d\n", y);
-		}
 
 		if(x < (width - 1) && y < (height - 1)
 				&& (y > 0) && (x > 0)){
