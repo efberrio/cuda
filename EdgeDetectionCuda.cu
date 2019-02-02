@@ -64,6 +64,9 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 										   - (2 * pixels[(x-1) + (y * width)])
 										   - pixels[(x-1) + ((y+1) * width)]);
 
+			if (index <= 1000) {
+				printf("xG=%d in index=%d\n", xG, index);
+			}
 
 			//Finds the vertical gradient
 			yG = (pixels[(x-1) + ((y+1) * width)]
@@ -72,7 +75,6 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 								  - pixels[(x-1) + ((y-1) * width)]
 										   - (2 * pixels[(x) + ((y-1) * width)])
 										   - pixels[(x+1) + ((y-1) * width)]);
-			printf("xG=%d\n", xG);
 			tempImage[index] = __double2int_rn(sqrt(__int2double_rn(xG * xG) + __int2double_rn(yG * yG)));
 
 		} else {
