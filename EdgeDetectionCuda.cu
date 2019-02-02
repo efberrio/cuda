@@ -52,31 +52,9 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 		if (index != 0) {
 			y = __double2int_rd((__int2double_rn(index) / __int2double_rn(width)));	
 		}
-		if (index < 5000) {
-			printf("x=%d, y=%d\n", x, y);
-			if (x < width) {
-				cantidadAciertos++;
-			}
-			if (y < height) {
-				cantidadAciertos++;
-			}
-			if (x > 0) {
-				cantidadAciertos++;
-			}
-			if (y > 0) {
-				cantidadAciertos++;
-			}
-		}
-		if (cantidadAciertos == 4) {
-			printf("cumple, porque no entra\n");
-		}
 		
 		if (x < (width - 1) && y < (height - 1)
 				&& (y > 0) && (x > 0)) {
-
-			if (index < 5000) {
-				printf("entrando\n");
-			}
 
 			//index = x + (y * width)
 			//Finds the horizontal gradient
@@ -101,9 +79,6 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 			//Pads out of bound pixels with 0
 			tempImage[index] = 0;
 
-		}
-		if (xG > 0) {
-			printf("xG=%d in index=%d\n", xG, index);
 		}
 	}
 
@@ -585,8 +560,6 @@ void Image::scaleImage(){
 
 //Sobel edge detection function - detects edges and draws an outline
 void Image::edgeDection(){
-	printf("a ver qué es lo que pasa");
-
     cudaError_t err = cudaSuccess;
 	size_t size = imageSize * sizeof(int);
 	/* Allocate memory in host */

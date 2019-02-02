@@ -493,10 +493,6 @@ void Image::edgeDection(){
 
 		}
 
-		if (xG > 0 && cantidadPrint < 1000) {
-			printf("xG=%d in i=%d\n", xG, i);
-			cantidadPrint++;
-		}
 	}
 
 	int cantidad = 0;
