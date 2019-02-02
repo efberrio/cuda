@@ -581,12 +581,12 @@ void Image::edgeDection(){
 	/* Copy data to device */
 	err = cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to copy array pixels from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	err = cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
+        fprintf(stderr, "Failed to copy array tempImage from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 	printf("copio memoria a device\n");
