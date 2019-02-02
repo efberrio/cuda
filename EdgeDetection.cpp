@@ -452,6 +452,8 @@ void Image::edgeDection(){
 
 	int * tempImage = new int[imageSize];
 
+	int cantidadPrint = 0;
+
 	for(unsigned int i = 0; i < imageSize; i++){
 
 		x = i % width;
@@ -475,9 +477,6 @@ void Image::edgeDection(){
 										   - (2 * pixels[(x-1) + (y * width)])
 										   - pixels[(x-1) + ((y+1) * width)]);
 
-			if (i <= 1000) {
-				printf("xG=%d in i=%d\n", xG, i);
-			}
 
 			//Finds the vertical gradient
 			yG = (pixels[(x-1) + ((y+1) * width)]
@@ -497,6 +496,10 @@ void Image::edgeDection(){
 
 		}
 
+		if (xG > 0 && cantidadPrint < 1000) {
+			printf("xG=%d in i=%d\n", xG, i);
+			cantidadPrint++;
+		}
 	}
 
 	int cantidad = 0;
