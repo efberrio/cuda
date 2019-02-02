@@ -540,7 +540,7 @@ void Image::scaleImage(){
 	printf("OK4\n");
 
 	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
-	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, minpix, maxpix, imageSize);
     err = cudaGetLastError();
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to launch scaleImageCuda kernel (error code %s)!\n", cudaGetErrorString(err));
