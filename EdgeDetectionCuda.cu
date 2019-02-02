@@ -549,11 +549,6 @@ void Image::scaleImage(){
 	printf("OK5\n");
 
 	/* Copy data to tohost device */
-	err = cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
-    if (err != cudaSuccess){
-        fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
-    }
 	err = cudaMemcpy(d_tempImage, tempImage, size, cudaMemcpyHostToDevice);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to copy vector tempImage from host to device (error code %s)!\n", cudaGetErrorString(err));
