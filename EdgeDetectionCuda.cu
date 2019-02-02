@@ -507,9 +507,12 @@ void Image::scaleImage(){
 
 	findMax();
 
+	print("OK1\N");
+
 	int *d_pixels;
 	size_t size = imageSize * sizeof(int);
     cudaError_t err = cudaSuccess;
+	print("OK2\N");
 
 	/* Allocate memory in device */
 	err = cudaMalloc((void **) &d_pixels, size);
@@ -517,6 +520,7 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to allocate device vector pixels (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK3\N");
 
 	/* Copy data to device */
 	err = cudaMemcpy(d_pixels, pixels, size, cudaMemcpyHostToDevice);
@@ -524,6 +528,7 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to copy vector pixels from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK4\N");
 
 	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
 	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
@@ -532,6 +537,7 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to launch scaleImageCuda kernel (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK5\N");
 
 	/* Copy data to tohost device */
 	err = cudaMemcpy(pixels, d_pixels, size, cudaMemcpyDeviceToHost);
@@ -539,6 +545,7 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to copy vector pixels from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK6\N");
 
 	/* Clean-up */
 	err = cudaFree(d_pixels);
@@ -546,12 +553,14 @@ void Image::scaleImage(){
         fprintf(stderr, "Failed to free device vector pixels (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK7\N");
 
     err = cudaDeviceReset();
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to deinitialize the device! error=%s\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+	print("OK8\N");
 
 	maxPixelValue = 255;
 
