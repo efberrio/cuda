@@ -52,7 +52,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 		if (index != 0 && x == 0) {
 			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));	
 		}
-		if (index < 20000) {
+		if (index < 200000) {
 			if (x < width) {
 				cantidadAciertos++;
 			}
