@@ -600,7 +600,7 @@ void Image::edgeDection(){
     }
 	printf("ejecuto kernel\n");
 
-	/* Copy data to host */
+	/* Copy data to host */ 
 	err = cudaMemcpy(tempImage, d_tempImage, size, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to copy vector tempImage from device to host (error code %s)!\n", cudaGetErrorString(err));
