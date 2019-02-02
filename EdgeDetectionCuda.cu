@@ -40,18 +40,18 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 	thread in the device */
 	int index = threadIdx.x * blockIdx.x * threadIdx.x;
 	int x = 0, y = 0;
-	float xG = 0, yG = 0;
+	int xG = 0, yG = 0;
 	/* Typical problems are not friendly multiples of blockDim.x.
 	Avoid accesing data beyond the end of the arrays */
 	if (index < imageSize) {
 		x = index % width;
 
-		if(index != 0 && x == 0){
-			y = (int) ((double)index / (double)width);
+		if (index != 0 && x == 0) {
+			y = __double2int_rn((__int2double_rn(index) / __int2double_rn(width)));
 		}
 
-		if(x < (width - 1) && y < (height - 1)
-				&& (y > 0) && (x > 0)){
+		if (x < (width - 1) && y < (height - 1)
+				&& (y > 0) && (x > 0)) {
 
 			//index = x + (y * width)
 			//Finds the horizontal gradient
@@ -71,7 +71,7 @@ __global__ void edgeDetectionCuda (int *pixels, int *tempImage, int width, int h
 										   - (2 * pixels[(x) + ((y-1) * width)])
 										   - pixels[(x+1) + ((y-1) * width)]);
 
-			tempImage[index] = (int) sqrt((xG * xG) + (yG * yG));
+			tempImage[index] = __double2int_rn(sqrt(__int2double_rn(xG * xG) + __int2double_rn(yG * yG)));
 
 		} else {
 
