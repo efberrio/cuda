@@ -1,0 +1,18 @@
+threads;run;image;time
+2;1;1; real 0m1.195s user 0m0.541s sys 0m0.784s
+2;1;2; real 0m25.929s user 0m3.283s sys 0m23.360s
+2;1;3; real 3m47.176s user 0m14.983s sys 3m35.287s
+2;2;1; real 0m1.558s user 0m0.532s sys 0m1.152s
+2;2;2; real 0m37.205s user 0m3.386s sys 0m34.532s
+2;2;3; real 3m46.751s user 0m14.962s sys 3m34.987s
+2;3;1; real 0m1.586s user 0m0.584s sys 0m1.127s
+2;3;2; real 0m37.262s user 0m3.386s sys 0m34.645s
+2;3;3; real 3m47.411s user 0m14.977s sys 3m35.569s
+2;4;1; real 0m1.555s user 0m0.541s sys 0m1.139s
+2;4;2; real 0m37.282s user 0m3.335s sys 0m34.655s
+2;4;3; real 3m46.062s user 0m15.341s sys 3m34.076s
+2;5;1; real 0m1.579s user 0m0.552s sys 0m1.149s
+2;5;2; real 0m37.361s user 0m3.310s sys 0m34.767s
+2;5;3; real 3m45.274s user 0m14.842s sys 3m33.549s
+4;1;1; real 0m1.559s user 0m0.544s sys 0m1.135s
+4;1;2; real 0m37.354s user 0m3.272s sys 0m34.780s
