@@ -508,7 +508,8 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 		printf("Error: Failed to build program executable!\n%s\n", err_code(ret));
 		clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
 		printf("%s\n", buffer);
-		return EXIT_FAILURE;
+		//return EXIT_FAILURE;
+		exit(1);
 	}
 	/* Create OpenCL Kernel */
 	kernel = clCreateKernel(program, "scaleImageOpenCL", &ret);
