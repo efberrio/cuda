@@ -516,7 +516,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	checkError(ret, "Creating kernel");
 
 	/* Set OpenCL Kernel Parameters */
-	ret = clSetKernelArg(kernel, 0, (void *)&d_pixels);
+	ret = clSetKernelArg(kernel, 0, size, (void *)&d_pixels);
 	checkError(ret, "Setting kernel arguments");
 	ret = clSetKernelArg(kernel, 1, sizeof(int), &minpix);
 	checkError(ret, "Setting kernel arguments");
@@ -538,7 +538,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	checkError(ret, "Waiting for commands to finish");
 	/******************************************************************************/
 	/* Copy results from the memory buffer */
-	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size_t, pixels, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
 	checkError(ret, "Creating program");
 
 	/* Finalization */
