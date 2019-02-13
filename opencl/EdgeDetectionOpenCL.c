@@ -516,7 +516,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	checkError(ret, "Creating kernel");
 
 	/* Set OpenCL Kernel Parameters */
-	ret = clSetKernelArg(kernel, 0, size_t, (void *)&d_pixels);
+	ret = clSetKernelArg(kernel, 0, (void *)&d_pixels);
 	checkError(ret, "Setting kernel arguments");
 	ret = clSetKernelArg(kernel, 1, sizeof(int), &minpix);
 	checkError(ret, "Setting kernel arguments");
