@@ -436,7 +436,6 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 
 	findMax();
 
-	int *d_pixels;
 	size_t size = imageSize * sizeof(int);
 
 	/******************************************************************************/
@@ -538,7 +537,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	checkError(ret, "Waiting for commands to finish");
 	/******************************************************************************/
 	/* Copy results from the memory buffer */
-	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size_t, h_pixels, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size_t, pixels, 0, NULL, NULL);
 	checkError(ret, "Creating program");
 
 	/* Finalization */
@@ -546,7 +545,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	ret = clFinish(command_queue);
 	ret = clReleaseKernel(kernel);
 	ret = clReleaseProgram(program);
-	ret = clReleaseMemObject(d_pi);
+	ret = clReleaseMemObject(d_pixels);
 	ret = clReleaseCommandQueue(command_queue);
 	ret = clReleaseContext(context);
 
