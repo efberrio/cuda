@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <CL/cl.h>
 #include <sys/types.h>
-#include <err_code.h>
+#include "err_code.h"
 
 using namespace std;
 
