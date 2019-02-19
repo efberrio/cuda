@@ -477,21 +477,21 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 
 	/* Get Platform and Device Info */
 	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
-	checkError(ret, (char*)"Getting platform");
+	checkError(ret, "Getting platform");
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
-	checkError(ret, (char*)"Getting device");
+	checkError(ret, "Getting device");
 	
 	printf("device and platform are ok\n");
 
 	/* Create OpenCL context */
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
-	checkError(ret, (char*)"Creating context");
+	checkError(ret, "Creating context");
 
 	printf("context created\n");
 
 	/* Create Command Queue */
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
-	checkError(ret, (char*)"Creating queue");
+	checkError(ret, "Creating queue");
 
 	//print kernel
 	//printf("\n%s\n%i bytes\n", source_str, (int)source_size); fflush(stdout);
@@ -502,7 +502,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	/* Create Kernel Program from the source */
 	program = clCreateProgramWithSource(context, 1, (const char **)&source_str,
 	(const size_t *)&source_size, &ret);
-	checkError(ret, (char*)"Creating program");
+	checkError(ret, "Creating program");
 
 	/* Build Kernel Program */
 	ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
@@ -519,25 +519,25 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	}
 	/* Create OpenCL Kernel */
 	kernel = clCreateKernel(program, "scaleImageOpenCL", &ret);
-	checkError(ret, (char*)"Creating kernel");
+	checkError(ret, "Creating kernel");
 
 	/* Create Memory Buffer */
 	d_pixels = clCreateBuffer(context, CL_MEM_READ_WRITE, size, NULL, &ret);
-	checkError(ret, (char*)"Creating buffer d_pixels");
+	checkError(ret, "Creating buffer d_pixels");
 
     // Write a and b vectors into compute device memory
     ret = clEnqueueWriteBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
-    checkError(ret, (char*)"Copying h_a to device at d_a");
+    checkError(ret, "Error Copying h_a to device at d_a");
 
 	/* Set OpenCL Kernel Parameters */
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&d_pixels);
-	checkError(ret, (char*)"Setting kernel arguments");
+	checkError(ret, "Setting kernel arguments");
 	ret = clSetKernelArg(kernel, 1, sizeof(int), &minpix);
-	checkError(ret, (char*)"Setting kernel arguments");
+	checkError(ret, "Setting kernel arguments");
 	ret = clSetKernelArg(kernel, 2, sizeof(int), &maxpix);
-	checkError(ret, (char*)"Setting kernel arguments");
+	checkError(ret, "Setting kernel arguments");
 	ret = clSetKernelArg(kernel, 3, sizeof(int), &imageSize);
-	checkError(ret, (char*)"Setting kernel arguments");
+	checkError(ret, "Setting kernel arguments");
 
 	//clEnqueueWriteBuffer(command_queue, pi, CL_TRUE, 0, 1, &h_pi, 0, NULL, NULL);
 	size_t global_work_size = blocks * threadsPerblock;
@@ -547,13 +547,13 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	//ret = clEnqueueTask(command_queue, kernel, 0, NULL,NULL);  //single work item
 	ret = clEnqueueNDRangeKernel(command_queue, kernel, work_dim,
 			0, &global_work_size, &local_work_size, 0, NULL, NULL);
-	checkError(ret, (char*)"Enqueueing kernel");
+	checkError(ret, "Enqueueing kernel");
 	ret = clFinish(command_queue);
-	checkError(ret, (char*)"Waiting for commands to finish");
+	checkError(ret, "Waiting for commands to finish");
 	/******************************************************************************/
 	/* Copy results from the memory buffer */
 	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
-	checkError(ret, (char*)"Creating program");
+	checkError(ret, "Creating program");
 
 	/* Finalization */
 	ret = clFlush(command_queue);
