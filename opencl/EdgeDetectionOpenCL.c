@@ -12,6 +12,7 @@
 
 using namespace std;
 
+const int THREADS_PER_BLOCK = 256;
 #define MAX_SOURCE_SIZE (0x100000)
 
 //Creating image class (base class)
@@ -528,7 +529,6 @@ void Image::scaleImage(int blocks, int threadsPerblock){
     ret = clEnqueueWriteBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
     checkError(ret, "Error Copying h_a to device at d_a");
 
-
 	/* Set OpenCL Kernel Parameters */
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&d_pixels);
 	checkError(ret, "Setting kernel arguments");
@@ -546,7 +546,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	/* Execute OpenCL Kernel */
 	//ret = clEnqueueTask(command_queue, kernel, 0, NULL,NULL);  //single work item
 	ret = clEnqueueNDRangeKernel(command_queue, kernel, work_dim,
-	0, &global_work_size, &local_work_size, 0, NULL, NULL);
+			0, &global_work_size, &local_work_size, 0, NULL, NULL);
 	checkError(ret, "Enqueueing kernel");
 	ret = clFinish(command_queue);
 	checkError(ret, "Waiting for commands to finish");
@@ -633,9 +633,9 @@ void run(char **argv);
 
 int main(int argc, char **argv){
 
-	if(argc != 5){
+	if(argc != 3){
 
-		cerr << "Usage: EdgeDetection imageName.pgm output.pgm blocks threadperblock";
+		cerr << "Usage: EdgeDetection imageName.pgm output.pgm";
 
 		return 1;
 
@@ -705,8 +705,11 @@ void run(char **argv){
 			            | ios::out
 						| ios::trunc);
 
-	int blocks = strtol(argv[3], NULL, 10);
-	int threadsPerblock = strtol(argv[4], NULL, 10);
+	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	int threadsPerblock = THREADS_PER_BLOCK;
+	//int blocks = strtol(argv[3], NULL, 10);
+	//int threadsPerblock = strtol(argv[4], NULL, 10);
+
 	printf("blocks=%d\n", blocks);
 	printf("threadsPerblock=%d\n", threadsPerblock);
 
@@ -718,9 +721,9 @@ void run(char **argv){
 
 		binaryImage.readImage(inFile);
 
-		binaryImage.edgeDection(blocks,threadsPerblock);
+		binaryImage.edgeDection(blocks, threadsPerblock);
 
-		binaryImage.scaleImage(blocks,threadsPerblock);
+		binaryImage.scaleImage(blocks, threadsPerblock);
 
 		binaryImage.writeImage(outFile);
 
