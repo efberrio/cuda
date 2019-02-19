@@ -525,7 +525,8 @@ void Image::scaleImage(){
     }
 
 	/* Launch scaleImageCuda() kernel on device with N threads in N blocks */
-	scaleImageCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
+	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	scaleImageCuda<<<blocks, THREADS_PER_BLOCK>>>(d_pixels, minpix, maxpix, imageSize);
     err = cudaGetLastError();
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to launch scaleImageCuda kernel (error code %s)!\n", cudaGetErrorString(err));
@@ -589,7 +590,8 @@ void Image::edgeDection(){
     }
 
 	/* Launch edgeDetectionCuda() kernel on device with N threads in N blocks */
-	edgeDetectionCuda<<<(imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
+	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	edgeDetectionCuda<<<blocks, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
     err = cudaGetLastError();
     if (err != cudaSuccess){
         fprintf(stderr, "Failed to launch edgeDetectionCuda kernel (error code %s)!\n", cudaGetErrorString(err));
