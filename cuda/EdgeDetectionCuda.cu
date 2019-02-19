@@ -591,6 +591,7 @@ void Image::edgeDection(){
 
 	/* Launch edgeDetectionCuda() kernel on device with N threads in N blocks */
 	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	printf("blocks=%d\n", blocks)
 	edgeDetectionCuda<<<blocks, THREADS_PER_BLOCK>>>(d_pixels, d_tempImage, width, height, imageSize);
     err = cudaGetLastError();
     if (err != cudaSuccess){
