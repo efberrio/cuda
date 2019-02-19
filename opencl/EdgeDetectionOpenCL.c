@@ -655,7 +655,7 @@ void Image::edgeDection() {
 		exit(1);
 	}
 	/* Create OpenCL Kernel */
-	kernel = clCreateKernel(program, "scaleImageOpenCL", &ret);
+	kernel = clCreateKernel(program, "edgeDetectionOpenCL", &ret);
 	checkError(ret, "Creating kernel");
 
 	/* Create Memory Buffer */
