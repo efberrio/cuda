@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include "err_code.h"
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
 
