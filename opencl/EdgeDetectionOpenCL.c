@@ -526,7 +526,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 
     // Write a and b vectors into compute device memory
     ret = clEnqueueWriteBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
-    checkError(err, "Copying h_a to device at d_a");
+    checkError(ret, "Error Copying h_a to device at d_a");
 
 
 	/* Set OpenCL Kernel Parameters */
