@@ -469,16 +469,24 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
 	fclose(fp);
 
+	printf("the source is open\n");
+
 	/******************************************************************************/
 	/* create objects */
 
 	/* Get Platform and Device Info */
 	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
-	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_DEFAULT, 1, &device_id, &ret_num_devices);
+	checkError(ret, "Getting platform");
+	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
+	checkError(ret, "Getting device");
+	
+	printf("device and platform are ok\n");
 
 	/* Create OpenCL context */
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	checkError(ret, "Creating context");
+
+	printf("context created\n");
 
 	/* Create Command Queue */
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
