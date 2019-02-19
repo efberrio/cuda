@@ -33,8 +33,8 @@ public:
 	virtual void writeImage(ofstream &outFile) = 0;
 
 	void readHeader(ifstream &inFile);
-	void scaleImage(int blocks, int threadsPerblock);
-	void edgeDection(int blocks, int threadsPerblock);
+	void scaleImage();
+	void edgeDection();
 
 	//Accessor methods
 	int getHeight(){return height;}
@@ -432,7 +432,7 @@ void Image::findMin(){
 }
 
 //Scales image so that the maximum pixel value is 255
-void Image::scaleImage(int blocks, int threadsPerblock){
+void Image::scaleImage(){
 
 	findMin();
 
@@ -540,6 +540,8 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	checkError(ret, "Setting kernel arguments");
 
 	//clEnqueueWriteBuffer(command_queue, pi, CL_TRUE, 0, 1, &h_pi, 0, NULL, NULL);
+	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	int threadsPerblock = THREADS_PER_BLOCK;
 	size_t global_work_size = blocks * threadsPerblock;
 	size_t local_work_size = threadsPerblock;
 	cl_uint work_dim = 1;
@@ -570,7 +572,7 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 }
 
 //Sobel edge detection function - detects edges and draws an outline
-void Image::edgeDection(int blocks, int threadsPerblock){
+void Image::edgeDection() {
 	int x = 0, y = 0;
 
 	int xG = 0, yG = 0;
@@ -705,13 +707,11 @@ void run(char **argv){
 			            | ios::out
 						| ios::trunc);
 
-	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
-	int threadsPerblock = THREADS_PER_BLOCK;
 	//int blocks = strtol(argv[3], NULL, 10);
 	//int threadsPerblock = strtol(argv[4], NULL, 10);
 
-	printf("blocks=%d\n", blocks);
-	printf("threadsPerblock=%d\n", threadsPerblock);
+	//printf("blocks=%d\n", blocks);
+	//printf("threadsPerblock=%d\n", threadsPerblock);
 
 	if(isBinary(inFile)){
 
@@ -721,9 +721,9 @@ void run(char **argv){
 
 		binaryImage.readImage(inFile);
 
-		binaryImage.edgeDection(blocks, threadsPerblock);
+		binaryImage.edgeDection();
 
-		binaryImage.scaleImage(blocks, threadsPerblock);
+		binaryImage.scaleImage();
 
 		binaryImage.writeImage(outFile);
 
@@ -735,9 +735,9 @@ void run(char **argv){
 
 		asciiImage.readImage(inFile);
 
-		asciiImage.edgeDection(blocks,threadsPerblock);
+		asciiImage.edgeDection();
 
-		asciiImage.scaleImage(blocks,threadsPerblock);
+		asciiImage.scaleImage();
 
 		asciiImage.writeImage(outFile);
 
