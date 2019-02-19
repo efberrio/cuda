@@ -47,10 +47,8 @@ __kernel void edgeDetectionOpenCL(__global int *pixels, __global int *tempImage,
             tempImage[index] = convert_int4_rte(sqrt(convert_float4(xG * xG) + convert_float4(yG * yG)));
 
         } else {
-
             //Pads out of bound pixels with 0
             tempImage[index] = 0;
-
         }
     }
 }

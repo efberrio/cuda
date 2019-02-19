@@ -555,7 +555,7 @@ void Image::scaleImage(){
 	/******************************************************************************/
 	/* Copy results from the memory buffer */
 	ret = clEnqueueReadBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
-	checkError(ret, "Creating program");
+	checkError(ret, "Getting results");
 
 	/* Finalization */
 	ret = clFlush(command_queue);
@@ -573,60 +573,151 @@ void Image::scaleImage(){
 
 //Sobel edge detection function - detects edges and draws an outline
 void Image::edgeDection() {
-	int x = 0, y = 0;
+	size_t size = imageSize * sizeof(int);
+	int * tempImage = (int *)malloc(size);
 
-	int xG = 0, yG = 0;
+	/******************************************************************************/
+	/* declare opencl variables */
+	cl_device_id device_id = NULL;
+	cl_context context = NULL;
+	cl_command_queue command_queue = NULL;
+	cl_mem d_pixels = NULL;
+	cl_mem d_tempImage = NULL;
+	cl_program program = NULL;
+	cl_kernel kernel = NULL;
+	cl_platform_id platform_id = NULL;
+	cl_uint ret_num_devices;
+	cl_uint ret_num_platforms;
+	cl_int ret;
 
-	int * tempImage = new int[imageSize];
+	/******************************************************************************/
+	/* open kernel */
+	FILE *fp;
+	char fileName[] = "./EdgeDetectionOpenCL.cl";
+	char *source_str;
+	size_t source_size;
 
-	int cantidadPrint = 0;
-
-	for(unsigned int i = 0; i < imageSize; i++){
-
-		x = i % width;
-
-		if(i != 0 && x == 0){
-			y = (int) ((double)i / (double)width);
-		}
-
-		if(x < (width - 1) && y < (height - 1)
-				&& (y > 0) && (x > 0)){
-
-			//index = x + (y * width)
-			//Finds the horizontal gradient
-			xG = (pixels[(x+1) + ((y-1) * width)]
-						 + (2 * pixels[(x+1) + (y * width)])
-						 + pixels[(x+1) + ((y+1) * width)]
-								  - pixels[(x-1) + ((y-1) * width)]
-										   - (2 * pixels[(x-1) + (y * width)])
-										   - pixels[(x-1) + ((y+1) * width)]);
-
-
-			//Finds the vertical gradient
-			yG = (pixels[(x-1) + ((y+1) * width)]
-						 + (2 * pixels[(x) + ((y + 1) * width)])
-						 + pixels[(x+1) + ((y+1) * width)]
-								  - pixels[(x-1) + ((y-1) * width)]
-										   - (2 * pixels[(x) + ((y-1) * width)])
-										   - pixels[(x+1) + ((y-1) * width)]);
-
-			//newPixel = sqrt(xG^2 + yG^2)
-			tempImage[i] = sqrt((xG * xG) + (yG * yG));
-
-		}else{
-
-			//Pads out of bound pixels with 0
-			tempImage[i] = 0;
-
-		}
-
+	/* Load the source code containing the kernel*/
+	fp = fopen(fileName, "r");
+	if (!fp) {
+		fprintf(stderr, "Failed to load kernel.\n");
+		exit(1);
 	}
+	source_str = (char*)malloc(MAX_SOURCE_SIZE);
+	source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
+	fclose(fp);
+
+	printf("the source is open\n");
+
+	/******************************************************************************/
+	/* create objects */
+
+	/* Get Platform and Device Info */
+	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+	checkError(ret, "Getting platform");
+	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
+	checkError(ret, "Getting device");
+	
+	printf("device and platform are ok\n");
+
+	/* Create OpenCL context */
+	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
+	checkError(ret, "Creating context");
+
+	printf("context created\n");
+
+	/* Create Command Queue */
+	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+	checkError(ret, "Creating queue");
+
+	//print kernel
+	//printf("\n%s\n%i bytes\n", source_str, (int)source_size); fflush(stdout);
+	/******************************************************************************/
+
+	/* create build program */
+
+	/* Create Kernel Program from the source */
+	program = clCreateProgramWithSource(context, 1, (const char **)&source_str,
+	(const size_t *)&source_size, &ret);
+	checkError(ret, "Creating program");
+
+	/* Build Kernel Program */
+	ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
+	if (ret != CL_SUCCESS)
+	{
+		size_t len;
+		char buffer[2048];
+
+		printf("Error: Failed to build program executable!\n%s\n", err_code(ret));
+		clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
+		printf("%s\n", buffer);
+		//return EXIT_FAILURE;
+		exit(1);
+	}
+	/* Create OpenCL Kernel */
+	kernel = clCreateKernel(program, "scaleImageOpenCL", &ret);
+	checkError(ret, "Creating kernel");
+
+	/* Create Memory Buffer */
+	d_pixels = clCreateBuffer(context, CL_MEM_READ_ONLY, size, NULL, &ret);
+	checkError(ret, "Creating buffer d_pixels");
+	d_tempImage = clCreateBuffer(context, CL_MEM_WRITE_ONLY, size, NULL, &ret);
+	checkError(ret, "Creating buffer d_tempImage");
+
+    // Write a and b vectors into compute device memory
+    ret = clEnqueueWriteBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
+    checkError(ret, "Error Copying pixels to device at d_pixels");
+
+	/* Set OpenCL Kernel Parameters */
+	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&d_pixels);
+	checkError(ret, "Setting kernel arguments");
+	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&d_tempImage);
+	checkError(ret, "Setting kernel arguments");
+	ret = clSetKernelArg(kernel, 2, sizeof(int), &width);
+	checkError(ret, "Setting kernel arguments");
+	ret = clSetKernelArg(kernel, 3, sizeof(int), &height);
+	checkError(ret, "Setting kernel arguments");
+	ret = clSetKernelArg(kernel, 4, sizeof(int), &imageSize);
+	checkError(ret, "Setting kernel arguments");
+
+	//clEnqueueWriteBuffer(command_queue, pi, CL_TRUE, 0, 1, &h_pi, 0, NULL, NULL);
+	int blocks = (imageSize + (THREADS_PER_BLOCK - 1)) / THREADS_PER_BLOCK;
+	int threadsPerblock = THREADS_PER_BLOCK;
+	size_t global_work_size = blocks * threadsPerblock;
+	size_t local_work_size = threadsPerblock;
+	cl_uint work_dim = 1;
+	/* Execute OpenCL Kernel */
+	//ret = clEnqueueTask(command_queue, kernel, 0, NULL,NULL);  //single work item
+	ret = clEnqueueNDRangeKernel(command_queue, kernel, work_dim,
+			0, &global_work_size, &local_work_size, 0, NULL, NULL);
+	checkError(ret, "Enqueueing kernel");
+	ret = clFinish(command_queue);
+	checkError(ret, "Waiting for commands to finish");
+	/******************************************************************************/
+	/* Copy results from the memory buffer */
+	ret = clEnqueueReadBuffer(command_queue, d_tempImage, CL_TRUE, 0, size, tempImage, 0, NULL, NULL);
+	checkError(ret, "Getting results");
+
+	/* Finalization */
+	ret = clFlush(command_queue);
+	ret = clFinish(command_queue);
+	ret = clReleaseKernel(kernel);
+	ret = clReleaseProgram(program);
+	ret = clReleaseMemObject(d_pixels);
+	ret = clReleaseMemObject(d_tempImage);
+	ret = clReleaseCommandQueue(command_queue);
+	ret = clReleaseContext(context);
+
+	free(source_str);
+
+	maxPixelValue = 255;
 
 	for(unsigned int i = 0; i < imageSize; i++){
-
 		pixels[i] = tempImage[i];
-
 	}
+
+	/* Clean-up host */
+	free(tempImage);
 }
 
 bool isBinary(ifstream &inFile);
