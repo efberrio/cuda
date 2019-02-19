@@ -5,13 +5,13 @@
 #include <sstream>
 #include <time.h>
 #include <stdlib.h>
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 #include <sys/types.h>
 #include "err_code.h"
 
 using namespace std;
 
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #define MAX_SOURCE_SIZE (0x100000)
 
 //Creating image class (base class)
