@@ -483,10 +483,6 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 	checkError(ret, "Creating queue");
 
-	/* Create Memory Buffer */
-	d_pixels = clCreateBuffer(context, CL_MEM_READ_WRITE, size, &pixels, &ret);
-	checkError(ret, "Creating buffer d_pixels");
-
 	//print kernel
 	//printf("\n%s\n%i bytes\n", source_str, (int)source_size); fflush(stdout);
 	/******************************************************************************/
@@ -514,6 +510,15 @@ void Image::scaleImage(int blocks, int threadsPerblock){
 	/* Create OpenCL Kernel */
 	kernel = clCreateKernel(program, "scaleImageOpenCL", &ret);
 	checkError(ret, "Creating kernel");
+
+	/* Create Memory Buffer */
+	d_pixels = clCreateBuffer(context, CL_MEM_READ_WRITE, size, NULL, &ret);
+	checkError(ret, "Creating buffer d_pixels");
+
+    // Write a and b vectors into compute device memory
+    ret = clEnqueueWriteBuffer(command_queue, d_pixels, CL_TRUE, 0, size, pixels, 0, NULL, NULL);
+    checkError(err, "Copying h_a to device at d_a");
+
 
 	/* Set OpenCL Kernel Parameters */
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&d_pixels);
