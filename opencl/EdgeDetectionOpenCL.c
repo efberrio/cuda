@@ -11,6 +11,7 @@
 
 using namespace std;
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #define MAX_SOURCE_SIZE (0x100000)
 
 //Creating image class (base class)
