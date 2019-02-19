@@ -470,7 +470,7 @@ void Image::scaleImage(){
 	source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
 	fclose(fp);
 
-	printf("the source is open\n");
+	//printf("the source is open\n");
 
 	/******************************************************************************/
 	/* create objects */
@@ -481,13 +481,13 @@ void Image::scaleImage(){
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
 	checkError(ret, "Getting device");
 	
-	printf("device and platform are ok\n");
+	//printf("device and platform are ok\n");
 
 	/* Create OpenCL context */
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	checkError(ret, "Creating context");
 
-	printf("context created\n");
+	//printf("context created\n");
 
 	/* Create Command Queue */
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
@@ -607,7 +607,7 @@ void Image::edgeDection() {
 	source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
 	fclose(fp);
 
-	printf("the source is open\n");
+	//printf("the source is open\n");
 
 	/******************************************************************************/
 	/* create objects */
@@ -618,13 +618,13 @@ void Image::edgeDection() {
 	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices);
 	checkError(ret, "Getting device");
 	
-	printf("device and platform are ok\n");
+	//printf("device and platform are ok\n");
 
 	/* Create OpenCL context */
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	checkError(ret, "Creating context");
 
-	printf("context created\n");
+	//printf("context created\n");
 
 	/* Create Command Queue */
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
