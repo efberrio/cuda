@@ -680,7 +680,6 @@ void Image::edgeDection(int threadsPerblock) {
 
 	//clEnqueueWriteBuffer(command_queue, pi, CL_TRUE, 0, 1, &h_pi, 0, NULL, NULL);
 	int blocks = (imageSize + (threadsPerblock - 1)) / threadsPerblock;
-	int threadsPerblock = THREADS_PER_BLOCK;
 	size_t global_work_size = blocks * threadsPerblock;
 	size_t local_work_size = threadsPerblock;
 	cl_uint work_dim = 1;
