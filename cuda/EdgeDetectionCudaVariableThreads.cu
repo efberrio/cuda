@@ -703,7 +703,7 @@ void run(char **argv){
 			            | ios::out
 						| ios::trunc);
 
-	int threadsPerblock = strtol(argv[4], NULL, 10);
+	int threadsPerblock = strtol(argv[3], NULL, 10);
 	printf("threadsPerblock=%d\n", threadsPerblock);
 
 	if(isBinary(inFile)){
