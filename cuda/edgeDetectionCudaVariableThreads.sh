@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "EDGE DETECTION - CUDA - VARIABLE THREADS - START"
-echo "run;image;time" > results_cuda.csv
+echo "run;image;threadsperblock;time" > results_cuda_vt.csv
 for (( i=1; i<=5; i++ ));
 do
 	for (( j=1; j<=3; j=j+1 ));
@@ -9,7 +9,7 @@ do
 		do
 			output=$(eval "time ./EdgeDetectionCudaVariableThreads image_"${j}".pgm image_"${j}"_out_cuda.pgm "${k}"" 2>&1)
 			realTime=${output:8:5}
-			echo ""$i";"$j";"$output >> results_cuda_vt.csv
+			echo ""$i";"$j";"$k";"$output >> results_cuda_vt.csv
 		done
 	done
 done
