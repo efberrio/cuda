@@ -1,0 +1,11 @@
+-- Para ejecutar el shell edgeDetectionMPISingleMachine.sh
+mpiCC EdgeDetectionMPI.cpp -o EdgeDetectionMPI -O3
+sudo chmod 754 *.sh
+sed -i 's/\r$//' edgeDetectionMPISingleMachine.sh
+./edgeDetectionMPISingleMachine.sh
+
+-- Para ejecutar el shell edgeDetectionMPICluster.sh
+mpiCC EdgeDetectionMPI.cpp -o EdgeDetectionMPI -O3
+sudo chmod 754 *.sh
+sed -i 's/\r$//' edgeDetectionMPICluster.sh
+./edgeDetectionMPICluster.sh
