@@ -467,6 +467,8 @@ void Image::scaleImage(){
 	//printf("workers=%d\n", workers);
 
 	if (processRank == MASTER_RANK) {
+		printf("scaleImage: Broadcasting basic data\n");
+		printf("scaleImage: Original array size=%lu\n", sizeof(pixels));
 		// Broadcasting values to all proceses
 		MPI_Bcast(&minpix, 1, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
 		MPI_Bcast(&maxpix, 1, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
@@ -474,6 +476,7 @@ void Image::scaleImage(){
 		MPI_Bcast(&pixelsPerWorker, 1, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
 	} else {
 		// Receiving values from all proceses
+		printf("scaleImage: Receiving basic data, p=%d\n", processRank);
 		MPI_Bcast(&minpix, 1, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
 		MPI_Bcast(&maxpix, 1, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
 		MPI_Bcast(&imageSize, 1, MPI_UNSIGNED, MASTER_RANK, MPI_COMM_WORLD);
@@ -493,6 +496,7 @@ void Image::scaleImage(){
 
 	// Scattering array pixels from MASTER node out to the other nodes
 	MPI_Scatter(pixels, pixelsPerWorker, MPI_INT, p_pixels, pixelsPerWorker, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
+	printf("scaleImage: Scatterted array size=%lu, process=%d\n", sizeof(p_pixels), processRank);
 
 	// Do the calculations
 	for (int i = 0; i < pixelsPerWorker; i++) {
@@ -521,6 +525,7 @@ void Image::scaleImage(){
 			}*/
 			pixels[i] = scaledPixels[i];
 		}
+		printf("scaleImage: Consolidation finished\n");
 		//printf("maximo=%d\n", maximo);
 		//printf("imageSize=%d VS cantidadEnCero=%d\n", imageSize, cantidadEnCero);
 	}
@@ -561,7 +566,7 @@ void Image::edgeDection(){
 
 	int start, end;
 	if (processRank == MASTER_RANK) {
-		//printf("in master\n");
+		printf("edgeDection: in master\n");
 		workers = tasks - 1;
 		rowsPerWorker = height / workers;
 		remainder = height % workers;
@@ -586,6 +591,7 @@ void Image::edgeDection(){
 			//printf("sent end=%d, processId=%d\n", end, processId);
 			MPI_Send((void *)pixels, imageSize, MPI_INT, processId, messageTag, MPI_COMM_WORLD);
 			//printf("sent pixels, processId=%d\n", processId);
+			printf("sent data from master to processId=%d\n", processId);
 		}
 
 		messageTag = WORKER_TAG;
@@ -603,9 +609,9 @@ void Image::edgeDection(){
 			//printf("received start=%d, end=%d for processId=%d\n", start, end, processId);
 			p_tempImage = (int *)malloc((end - start) * sizeof(int));
 			MPI_Recv((void *)p_tempImage, (end - start), MPI_INT, processId, messageTag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			//printf("received results processId=%d\n", processId);
+			printf("received results processId=%d\n", processId);
 
-			//printf("reasigning to pixels\n");
+			printf("reasigning to pixels\n");
 			for (unsigned int i = 0; i < (end - start); i++) {
 				pixels[i + start] = p_tempImage[i];
 			}
@@ -632,6 +638,7 @@ void Image::edgeDection(){
 		//printf("pixels allocated on slave, processRank=%d\n", processRank);
 		MPI_Recv((void *)pixels, (width * height), MPI_INT, MASTER_RANK, messageTag, MPI_COMM_WORLD, &status);
 		//printf("receiving pixels, processRank=%d\n", processRank);
+		printf("receiving data, processRank=%d\n", processRank);
 
 		p_tempImage = (int *) malloc(sizeof(int) * (rows * width));
 		// Do the calculations
@@ -684,7 +691,7 @@ void Image::edgeDection(){
 		free(p_tempImage);
 		free(pixels);
 
-		//printf("returned result for processRank=%dn", processRank);
+		printf("returned result for processRank=%dn", processRank);
 	}
 
 }

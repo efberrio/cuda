@@ -8,4 +8,7 @@ sed -i 's/\r$//' edgeDetectionMPISingleMachine.sh
 mpiCC EdgeDetectionMPI.cpp -o EdgeDetectionMPI -O3
 sudo chmod 754 *.sh
 sed -i 's/\r$//' edgeDetectionMPICluster.sh
-./edgeDetectionMPICluster.sh
+nohup ./edgeDetectionMPICluster.sh &
+
+
+mpirun -np 12 -mca btl ^openib EdgeDetectionMPI image_1.pgm image_1_out_mpi.pgm
